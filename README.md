@@ -1,17 +1,19 @@
 # NLW Agents (Back-End)
 
-Este é o back-end do projeto **NLW Agents**, desenvolvido durante o evento **Next Level Week (NLW)** promovido pela **Rocketseat**.  
-A aplicação é construída com **Node.js**, utilizando **TypeScript** e bibliotecas modernas para desenvolvimento de APIs.
+Este projeto é o **back-end** da aplicação **NLW Agents**, desenvolvido durante o evento **NLW (Next Level Week)** promovido pela [Rocketseat](https://www.rocketseat.com.br/).
+
+A API permite a criação de salas, envio de perguntas e utiliza **inteligência artificial** para gerar respostas com base em áudios transcritos.
 
 ## 🚀 Tecnologias e Ferramentas
 
-- **Node.js** – Plataforma de execução JavaScript no servidor.
-- **TypeScript** – Superset do JavaScript com tipagem estática.
-- **Fastify** – Framework web rápido e leve para criação de APIs.
-- **Prisma ORM** – Mapeamento objeto-relacional para acesso ao banco de dados.
-- **SQLite** – Banco de dados leve e fácil de configurar (ideal para desenvolvimento).
-- **Zod** – Validação de dados com segurança de tipos.
-- **dotenv** – Gerenciamento de variáveis de ambiente.
+- **Node.js**
+- **Fastify** – framework leve e performático
+- **TypeScript**
+- **Drizzle ORM** – mapeamento objeto-relacional
+- **PostgreSQL + pgvector** – banco de dados com suporte a vetores
+- **Zod** – validação de dados
+- **OpenAI / Gemini API** – geração de embeddings e respostas (dependendo da implementação)
+- **Docker** – para ambiente de banco de dados
 
 ## 🧱 Padrões e Organização
 
@@ -29,45 +31,83 @@ A aplicação é construída com **Node.js**, utilizando **TypeScript** e biblio
 git clone https://github.com/ViniciusMendesLima/nlw_agents.git
 cd nlw_agents
 ```
-### 2. Instalar dependências
-
+### 2. Suba o banco de dados com Docker:
+```bash
+docker compose up -d
+```
+### 3. Instale as dependências:
+```bash
 npm install
-### 3. Configurar variáveis de ambiente
+# ou
+yarn
+```
+
+### 4. Configurar variáveis de ambiente
 Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
 
 ```bash
-DATABASE_URL="file:./dev.db"
+# Porta onde o servidor HTTP será iniciado
 PORT=3333
+
+# URL de conexão com o banco de dados
+# Exemplo SQLite: "file:./dev.db"
+# Exemplo PostgreSQL: "postgresql://usuario:senha@localhost:5432/nome_do_banco"
+DATABASE_URL=""
+
+# Chave de API da Gemini (Google AI)
+# Gere sua chave gratuita em: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=""
 ```
 Altere a PORT se necessário.
 
-### 4. Criar o banco de dados e rodar as migrations
+### 5. Gere e aplique as migrations:
 ```bash
-npx prisma migrate dev
+npm run db:generate
+npm run db:migrate
+
 ```
-### 5. Iniciar o servidor em modo desenvolvimento
+## 6. (Opcional) Popule o banco com dados falsos:
+
+```bash
+npm run db:seed
+```
+
+## 7. Inicie o servidor:
 ```bash
 npm run dev
 ```
+
 A API estará disponível em: http://localhost:3333
+
+
 
 ## 📁 Estrutura do Projeto
 ```bash
-src/
-├── http/              # Rotas e controladores
-│   └── controllers/
-│   └── routes/
-├── lib/               # Configurações auxiliares (como o Prisma)
-├── schemas/           # Validações com Zod
-├── server.ts          # Ponto de entrada da aplicação
-prisma/
-├── schema.prisma      # Definição do modelo de dados
-.env                   # Variáveis de ambiente
+├── src/                       # Código fonte principal
+│   ├── db/                    # Configuração do banco de dados, migrations, seeds
+│   ├── http/                  # Rotas HTTP e configuração do servidor web
+│   │   └── routes/            # Arquivos das rotas da API
+│   ├── services/              # Serviços e lógica de negócio, integrações externas (ex: Gemini)
+│   ├── env.ts                 # Configuração e carregamento das variáveis de ambiente
+│   └── server.ts              # Arquivo principal que inicializa o servidor
+│
+├── .env.example               # Exemplo de arquivo .env para configuração do ambiente
+├── .gitignore                 # Arquivos e pastas ignorados pelo Git
+├── README.md                  # Documentação do projeto
+├── biome.jsonc                # Configuração do Biome (formatter/linter)
+├── client.http                # Arquivo para testes HTTP (ex: para o REST Client VSCode)
+├── docker-compose.yml         # Configuração do Docker Compose para containers (ex: PostgreSQL)
+├── drizzle.config.ts          # Configuração do Drizzle ORM (banco de dados)
+├── package.json               # Dependências e scripts do projeto
+├── package-lock.json          # Versões fixas das dependências
+└── tsconfig.json              # Configuração do TypeScript
 ```
-## 🧪 Scripts úteis
-- `npm run dev` — Inicia o servidor com **hot-reload** em ambiente de desenvolvimento.
-- `npx prisma studio` — Abre o **painel visual** do Prisma para gerenciamento de dados (acesso via `http://localhost:5555`).
-- `npx prisma migrate dev` — Executa as **migrations** e cria o banco de dados com base no schema Prisma.
-- `npx prisma generate` — Gera o **cliente Prisma** para comunicação com o banco de dados.
+## 🧪 Endpoints Principais
+**GET /rooms** – Listar salas
 
-Feito com 💜 durante o NLW da Rocketseat
+**POST /rooms** – Criar nova sala
+
+**POST /rooms/:roomId/questions** – Enviar pergunta para uma sala
+
+## 📄 Licença
+Este projeto é educacional e foi desenvolvido durante o evento NLW Agents da Rocketseat.
